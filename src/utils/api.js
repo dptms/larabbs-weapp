@@ -52,8 +52,8 @@ const login = async (params = {}) => {
 
     // 登陆成功，记录 token 信息
     if (authResponse.statusCode === 201) {
-        wepy.setStroageSync('access_token', authResponse.data.access_token)
-        wepy.setStroageSync('asccess_token_expried_at', new Date().getTime() + authResponse.data.expires_in * 1000)
+        wepy.setStorageSync('access_token', authResponse.data.access_token)
+        wepy.setStorageSync('asccess_token_expried_at', new Date().getTime() + authResponse.data.expires_in * 1000)
     }
 
     return authResponse
