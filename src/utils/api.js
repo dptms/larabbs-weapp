@@ -13,7 +13,7 @@ const request = async (options, showLoading = true) => {
     }
     // 显示加载中
     if (showLoading) {
-        wepy.showLoading({ title: '加载中' })
+        wepy.showLoading({title: '加载中'})
     }
     // 拼接请求地址
     options.url = host + '/' + options.url
@@ -53,13 +53,98 @@ const login = async (params = {}) => {
     // 登陆成功，记录 token 信息
     if (authResponse.statusCode === 201) {
         wepy.setStorageSync('access_token', authResponse.data.access_token)
-        wepy.setStorageSync('asccess_token_expried_at', new Date().getTime() + authResponse.data.expires_in * 1000)
+        wepy.setStorageSync('access_token_expired_at', new Date().getTime() + authResponse.data.expires_in * 1000)
     }
 
     return authResponse
 }
 
+// 刷新 token
+const refreshToken = async (accessToken) => {
+    // 请求刷新接口
+    let refreshResponse = await wepy.request({
+        url: host + '/authorizations/current',
+        method: 'PUT',
+        header: {
+            'Authorization': 'Bearer ' + accessToken
+        }
+    })
+
+    // 刷新成功状态码为 200
+    if (refreshResponse.statusCode === 200) {
+        // 将 Token 及过期时间保存在 storage 中
+        wepy.setStorageSync('access_token', refreshResponse.data.access_token)
+        wepy.setStorageSync('access_token_expired_at', new Date().getTime() + refreshResponse.data.expires_in * 1000)
+    }
+
+    return refreshResponse
+}
+
+// 获取 token
+const getToken = async (options) => {
+    // 从缓存中获取 Token
+    let accessToken = wepy.getStorageSync('access_token')
+    let expiredAt = wepy.getStorageSync('access_token_expired_at')
+
+    // 如果token 过期了，则调用刷新方法
+    if (accessToken && new Date().getTime() > expiredAt) {
+        let refreshResponse = await refreshToken(accessToken)
+
+        // 刷新成功
+        if (refreshResponse.statusCode === 200) {
+            accessToken = refreshResponse.data.access_token
+        } else {
+            // 刷新失败了，重新调用登陆方法，设置 Token
+            let authResponse = await login()
+            if (authResponse.statusCode === 201) {
+                accessToken = authResponse.data.access_token
+            }
+        }
+    }
+    return accessToken
+}
+
+// 带身份认证的请求
+const authRequest = async (options, showLoading = true) => {
+    if (typeof options === 'string') {
+        options = {
+            url: options
+        }
+    }
+    // 获取token
+    let accessToken = await getToken()
+
+    // 将 Token 设置在 header 中
+    let header = options.header || {}
+    header.Authorization = 'Bearer ' + accessToken
+    options.header = header
+
+    return request(options, showLoading)
+}
+
+// 退出登录
+const logout = async (params = {}) => {
+    let accessToken = wepy.getStorageSync('access_token')
+    // 调用删除 Token 接口，让 Token 失效
+    let logoutResponse = await wepy.request({
+        url: host + '/authorizations/current',
+        method: 'DELETE',
+        header: {
+            'Authorization': 'Bearer ' + accessToken
+        }
+    })
+
+    if (logoutResponse.statusCode === 204) {
+        wepy.clearStorage()
+    }
+
+    return logoutResponse
+}
+
 export default {
     request,
-    login
+    authRequest,
+    refreshToken,
+    login,
+    logout
 }
