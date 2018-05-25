@@ -71,7 +71,7 @@
     import wepy from 'wepy'
     import api from '@/utils/api'
 
-    export default class User extends wepy.page {
+    export default class UserMe extends wepy.page {
         config = {
             navigationBarTitleText: '我的'
         }
