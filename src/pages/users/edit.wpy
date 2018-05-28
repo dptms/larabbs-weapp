@@ -6,12 +6,33 @@
     .introduction {
         height: 3.3em;
     }
+
+    .avatar-wrap {
+        display: flex;
+        margin-top: 10px;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .avatar {
+        display: block;
+        height: 80px;
+        width: 80px;
+        border-radius: 50%;
+    }
 </style>
 
 <template>
     <view class="page">
         <view class="page__bd">
             <form bindsubmit="submit">
+                <!--头像-->
+                <view class="avatar-wrap">
+                    <image class="avatar" src="{{user.avatar}}" @tap="updateAvatar"/>
+                </view>
+                <view class="avatar-wrap error-message" wx:if="{{errors.image}}">
+                    {{errors.image[0]}}
+                </view>
                 <!--填写姓名-->
                 <view class="weui-cells__title">姓名</view>
                 <view class="weui-cells weui-cells_after-title">
@@ -81,7 +102,9 @@
             // 用户信息
             user: null,
             // 错误信息
-            errors: null
+            errors: null,
+            //头像 id
+            avatarId: 0
         }
 
         async onShow() {
@@ -90,12 +113,21 @@
         }
 
         async submit(e) {
+            // 每次提交重置 error
             this.errors = null
             try {
+                // e.detai.value 为表单提交的数据
+                let formData = e.detail.value
+
+                // 当 avatarId 被设置过后 增加到 avatar_image_id 中
+                if (this.avatarId !== 0) {
+                    formData.avatar_image_id = this.avatarId
+                }
+
                 let editResponse = await api.authRequest({
                     url: 'user',
                     method: 'PUT',
-                    data: e.detail.value
+                    data: formData
                 })
 
                 // 设置报错信息
@@ -122,6 +154,50 @@
                     title: '提示',
                     content: '服务器错误，请联系管理员'
                 })
+            }
+        }
+
+        methods = {
+            async updateAvatar() {
+                this.errors = null
+                // 选择头像图片
+                let image = await wepy.chooseImage({count: 1})
+
+                try {
+                    // 获取选择的图片
+                    let avatar = image.tempFilePaths[0]
+
+                    // 调用上传接口
+                    let imageResponse = await api.updateFile({
+                        url: 'images',
+                        method: 'POST',
+                        name: 'image',
+                        formData: {
+                            type: 'avatar'
+                        },
+                        filePath: avatar
+                    })
+                    let responseData = JSON.parse(imageResponse.data)
+                    // 设置报错信息
+                    if (imageResponse.statusCode === 422) {
+                        this.errors = responseData.errors
+                        this.$apply()
+                    }
+
+                    // 上传成功 记录数据
+                    if (imageResponse.statusCode === 201) {
+                        // 小程序上传结果没有做 JSON.parse，需要手动处理
+                        this.user.avatar = responseData.path
+                        this.avatarId = responseData.id
+                        this.$apply()
+                    }
+                } catch (err) {
+                    console.log(err)
+                    wepy.showModal({
+                        title: '提示',
+                        content: '服务器错误，请联系管理员'
+                    })
+                }
             }
         }
     }
