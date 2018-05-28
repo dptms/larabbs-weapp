@@ -21,8 +21,8 @@
                         <image class="avatar" src="{{user.avatar}}"/>
                     </view>
                     <view class="weui-cell__bd">
-                        <view>{{user.name}}</view>
-                        <view class="page__desc">{{user.introduction || ''}}</view>
+                        <view class="weui-media-box__title">{{user.name}}</view>
+                        <view class="weui-media-box__desc">{{user.introduction || ''}}</view>
                     </view>
                     <view class="weui-cell__ft weui-cell__ft_in-access"></view>
                 </navigator>
