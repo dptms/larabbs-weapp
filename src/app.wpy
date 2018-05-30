@@ -97,9 +97,7 @@
         }
 
         onLaunch() {
-            wepy.login().then(res => {
-                console.log('login:', res)
-            })
+
         }
 
         async getCurrentUser() {
@@ -134,6 +132,20 @@
 
         checkLogin() {
             return (wepy.getStorageSync('access_token') !== '')
+        }
+
+        globalData = {
+            refreshPages: []
+        }
+
+        checkRefreshPages(route, callback) {
+            let refreshIndex = this.globalData.refreshPages.indexOf(route)
+            if (refreshIndex === -1) {
+                return
+            }
+
+            this.globalData.refreshPages.splice(refreshIndex, 1)
+            callback && callback()
         }
     }
 </script>
