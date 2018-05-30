@@ -100,7 +100,7 @@
 
                     // 格式化 updated_at
                     topics.forEach(function (topic) {
-                        topic.created_at_diff = util.diffForHumans(topic.created_at)
+                        topic.updated_at_diff = util.diffForHumans(topic.updated_at)
                     })
 
                     // 如果传入 reset 为 true，则覆盖 topics
