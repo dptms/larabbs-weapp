@@ -54,13 +54,26 @@
 
         data = {
             requestData: {},
-            include: 'user,topic'
+            include: 'user,topic',
+            userId: 0,
         }
 
         async onLoad(options) {
+            this.userId = options.user_id
             this.requestData.url = 'users/' + options.user_id + '/replies'
             this.requestData.include = 'user,topic'
             this.getReplies()
+        }
+
+        onShow() {
+
+            this.$parent.checkRefreshPages(this.getCurrentPages().pop().route, () => {
+                this.noMoreData = false
+                this.page = 1
+                this.requestData.url = 'users/' + this.userId + '/replies'
+                this.requestData.include = 'user,topic'
+                this.getReplies()
+            })
         }
     }
 </script>

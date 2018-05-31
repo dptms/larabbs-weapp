@@ -6,6 +6,14 @@
         width: 50px;
         height: 50px;
     }
+
+    .reply-create {
+        width: 40px;
+        height: 40px;
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+    }
 </style>
 
 <template>
@@ -35,6 +43,10 @@
                     </view>
                 </view>
             </view>
+            <!--回复连接-->
+            <navigator url="/pages/replies/create?topic_id={{topicId}}">
+                <image class="reply-create" src="/images/reply.png"/>
+            </navigator>
         </view>
     </view>
 </template>
@@ -52,14 +64,24 @@
         }
 
         data = {
+            topicId: 0,
             requestData: {}
         }
 
         mixins = [replyMixin]
 
         async onLoad(options) {
+            this.topicId = options.topic_id
             this.requestData.url = 'topics/' + options.topic_id + '/replies'
             this.getReplies()
+        }
+
+        onShow() {
+            this.$parent.checkRefreshPages(this.getCurrentPages().pop().route, () => {
+                this.noMoreData = false
+                this.page = 1
+                this.getReplies(true)
+            })
         }
     }
 </script>

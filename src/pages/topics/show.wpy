@@ -26,6 +26,14 @@
         width: 50px;
         height: 50px;
     }
+
+    .create-reply{
+        width: 40px;
+        height: 40px;
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+    }
 </style>
 
 <template>
@@ -88,6 +96,10 @@
                     </navigator>
                 </view>
             </view>
+            <!--回复按钮-->
+            <navigator url="/pages/replies/create?topic_id={{topic.id}}">
+                <image class="create-reply" src="/images/reply.png" />
+            </navigator>
         </view>
     </view>
 </template>
@@ -161,6 +173,12 @@
             // 获取当前登录用户
             this.user = await this.$parent.getCurrentUser()
             this.$apply()
+        }
+
+        onShow(){
+            this.$parent.checkRefreshPages(this.getCurrentPages().pop().route,()=>{
+                this.getTopic(this.topic.id)
+            })
         }
 
         methods = {
