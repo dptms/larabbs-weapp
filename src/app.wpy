@@ -100,7 +100,34 @@
         }
 
         onLaunch() {
+            // 小程序启动，调用一次获取未读消息数
+            this.updateUnreadCount()
+            // 每隔 60s，调用一次获取未读消息数
+            setInterval(() => {
+                this.updateUnreadCount()
+            }, 60000)
+        }
 
+        async updateUnreadCount() {
+            // 如果未登录直接返回
+            if (!this.checkLogin()) {
+                return
+            }
+            try {
+                // 请求消息统计接口
+                let notificationResponse = await api.authRequest('user/notifications/stats', false)
+
+                // 请求成功，复制全局变量 unreadCount
+                if (notificationResponse.statusCode === 200) {
+                    this.globalData.unreadCount = notificationResponse.data.unread_count
+                }
+            } catch (err) {
+                console.log(err)
+                wepy.showModal({
+                    title: '提示',
+                    content: '系统错误，请联系管理员'
+                })
+            }
         }
 
         async getCurrentUser() {
@@ -138,7 +165,8 @@
         }
 
         globalData = {
-            refreshPages: []
+            refreshPages: [],
+            unreadCount: 0
         }
 
         checkRefreshPages(route, callback) {
