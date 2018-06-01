@@ -109,7 +109,7 @@
     import api from '@/utils/api'
     import util from '@/utils/util'
 
-    export default class show extends wepy.page {
+    export default class TopicShow extends wepy.page {
         config = {
             navigationBarTitleText: '话题详情'
         }
@@ -156,7 +156,7 @@
                 }
 
                 if (topicResponse.statusCode === 404) {
-                    this.$parent.global.topicRefresh = true
+                    // this.$parent.global.topicRefresh = true
                     wepy.navigateBack()
                 }
             } catch (err) {

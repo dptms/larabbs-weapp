@@ -1,0 +1,149 @@
+<style lang="less">
+    .notification-avatar {
+        width: 50px;
+        height: 50px;
+        border: 1px solid #ccc;
+        padding: 4px;
+        border-radius: 4px;
+    }
+</style>
+
+<template>
+    <view class="page">
+        <view class="page__bd">
+            <view class="weui-panel weui-panel_access">
+                <view class="weui-panel__bd">
+                    <repeat for="{{notifications}}" wx:key="index" index="index" item="notification">
+                        <view class="weui-media-box weui-media-box_appmsg" hover-class="weui-cell_active">
+                            <navigator class="weui-media-box__hd weui-media-box__hd_in-appmsg"
+                                       url="/pages/users/show?user_id={{notification.data.user_id}}">
+                                <image src={{notification.data.user_avatar}}
+                                       class="weui-media-box__thumb notification-avatar"/>
+                            </navigator>
+                            <view class="weui-media-box__bd weui-media-box__bd_in-appmsg">
+                                <navigator class="weui-media-box__title"
+                                           url="/pages/topics/show?id={{notification.data.topic_id}}">
+                                    <view style="display:inline-block;vertical-align:middle">
+                                        {{notification.data.user_name}}
+                                    </view>
+                                    评论了
+                                    <view style="display:inline-block;vertical-align:middle">
+                                        {{notification.data.topic_title}}
+                                    </view>
+                                </navigator>
+                                <view class="weui-media-box__desc">
+                                    <rich-text nodes="{{notification.data.reply_content}}"></rich-text>
+                                </view>
+                                <view class="weui-media-box__info">
+                                    <view class="weui-media-box__info__meta">{{notification.created_at_diff}}</view>
+                                </view>
+                            </view>
+                        </view>
+                    </repeat>
+                    <view class="weui-loadmore weui-loadmore_line" wx:if="{{noMoreData}}">
+                        <view class="weui-loadmore__tips weui-loadmore__tips_in-line">没有更多数据</view>
+                    </view>
+                </view>
+            </view>
+        </view>
+    </view>
+</template>
+
+<script>
+    import wepy from 'wepy'
+    import api from '@/utils/api'
+    import util from '@/utils/util'
+
+    export default class NotificationIndex extends wepy.page {
+        config = {
+            navigationBarTitleText: '我的消息',
+            enablePullDownRefresh: true
+        }
+        data = {
+            notifications: [],
+            page: 1,
+            noMoreData: false,
+            isLoading: false
+        }
+
+        onLoad() {
+            this.getNotifications(true)
+            this.markAsRead()
+        }
+
+        async getNotifications(reset = false) {
+            try {
+                let notificationResponse = await api.authRequest({
+                    url: 'user/notifications',
+                    data: {
+                        page: this.page
+                    }
+                })
+
+                if (notificationResponse.statusCode === 200) {
+                    let notifications = notificationResponse.data.data
+                    // 格式化 created_at
+                    notifications.forEach((notification) => {
+                        notification.created_at_diff = util.diffForHumans(notification.created_at)
+                    })
+                    // 覆盖还是合并数据
+                    this.notifications = reset ? notifications : this.notifications.concat(notifications)
+                    let pagination = notificationResponse.data.meta.pagination
+                    if (pagination.total_pages === pagination.current_page) {
+                        this.noMoreData = true
+                    }
+                    this.$apply()
+                }
+
+                return notificationResponse
+            } catch (e) {
+                console.log(e)
+                wepy.showModal({
+                    title: '提示',
+                    content: '系统错误，请联系管理员'
+                })
+            }
+        }
+
+        async onPullDownRefresh() {
+            this.moMoreData = false
+            this.page = 1
+            await this.getNotifications(true)
+            this.markAsRead()
+            wepy.stopPullDownRefresh()
+        }
+
+        async markAsRead() {
+            try {
+                let readResponse = await api.authRequest({
+                    url: 'user/read/notifications',
+                    method: 'PUT'
+                }, false)
+
+                if (readResponse.statusCode === 204) {
+                    this.$parent.globalData.unreadCount = 0
+                    this.$apply()
+                }
+            } catch (err) {
+                console.log(err)
+                wepy.showModal({
+                    title: '提示',
+                    content: '系统错误，请联系管理员'
+                })
+            }
+
+            return readResponse
+        }
+
+        async onReachBottom() {
+            if (this.noMoreData || this.isLoading) {
+                return
+            }
+            this.page = this.page + 1
+            this.isLoading = true
+            await this.getNotifications()
+            this.isLoading = false
+            this.$apply()
+        }
+    }
+</script>

@@ -65,13 +65,14 @@
                 'pages/auth/register',
                 'pages/replies/index',
                 'pages/replies/userIndex',
-                'pages/replies/create'
+                'pages/replies/create',
+                'pages/notifications/index'
             ],
             window: {
                 backgroundTextStyle: 'light',
-                navigationBarBackgroundColor: '#fff',
+                navigationBarBackgroundColor: '#06bbb2',
                 navigationBarTitleText: 'LaraBBS',
-                navigationBarTextStyle: 'black'
+                navigationBarTextStyle: 'white'
             },
             tabBar: {
                 list: [

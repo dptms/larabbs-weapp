@@ -55,7 +55,7 @@
     import wepy from 'wepy'
     import replyMixin from '@/mixins/replyMixin'
 
-    export default class Index extends wepy.page {
+    export default class ReplyIndex extends wepy.page {
         config = {
             // 页面标题
             navigationBarTitleText: '回复列表',

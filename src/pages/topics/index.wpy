@@ -93,7 +93,7 @@
     import topicList from '@/components/topicList'
     import unreadCount from '@/mixins/unreadCount'
 
-    export default class Index extends wepy.page {
+    export default class TopicIndex extends wepy.page {
         config = {
             enablePullDownRefresh: true
         }
