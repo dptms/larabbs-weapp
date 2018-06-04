@@ -14,6 +14,11 @@
         bottom: 30px;
         right: 30px;
     }
+
+    .reply-delete {
+        width: 20px;
+        height: 20px;
+    }
 </style>
 
 <template>
@@ -36,6 +41,8 @@
                                     <view class="weui-media-box__info__meta">{{reply.created_at_diff}}</view>
                                 </view>
                             </view>
+                            <image @tap="deleteReply({{reply.topic_id}},{{reply.id}})" wx:if="{{reply.can_delete}}"
+                                   class="reply-delete" src="/images/trash.png"/>
                         </view>
                     </repeat>
                     <view class="weui-loadmore weui-loadmore_line" wx:if="{{noMoreData}}">
@@ -82,6 +89,12 @@
                 this.page = 1
                 this.getReplies(true)
             })
+        }
+
+        methods = {
+            deleteReply(topic_id, reply_id) {
+
+            }
         }
     }
 </script>
