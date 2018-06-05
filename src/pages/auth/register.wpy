@@ -162,7 +162,6 @@
             }
 
             try {
-                console.log(e)
                 let formData = e.detail.value
                 formData.verification_key = this.verificationCode.key
 
@@ -194,6 +193,8 @@
                     wepy.setStorageSync('access_token_expired_at', new Date().getTime() + registerResponse.data.meta.expires_in * 1000)
                     // 设置用户信息
                     wepy.setStorageSync('userInfo', registerResponse.data)
+                    // 获取用户权限
+                    this.$parent.getPerms()
 
                     wepy.showToast({
                         title: '注册成功',
