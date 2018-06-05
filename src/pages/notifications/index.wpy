@@ -17,7 +17,7 @@
                         <view class="weui-media-box weui-media-box_appmsg" hover-class="weui-cell_active">
                             <navigator class="weui-media-box__hd weui-media-box__hd_in-appmsg"
                                        url="/pages/users/show?user_id={{notification.data.user_id}}">
-                                <image src={{notification.data.user_avatar}}
+                                <image src="{{notification.data.user_avatar}}"
                                        class="weui-media-box__thumb notification-avatar"/>
                             </navigator>
                             <view class="weui-media-box__bd weui-media-box__bd_in-appmsg">
@@ -131,8 +131,6 @@
                     content: '系统错误，请联系管理员'
                 })
             }
-
-            return readResponse
         }
 
         async onReachBottom() {

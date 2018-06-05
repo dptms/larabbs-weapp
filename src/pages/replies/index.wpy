@@ -41,7 +41,7 @@
                                     <view class="weui-media-box__info__meta">{{reply.created_at_diff}}</view>
                                 </view>
                             </view>
-                            <image @tap="deleteReply({{reply.topic_id}},{{reply.id}})" wx:if="{{reply.can_delete}}"
+                            <image @tap="deleteReply({{reply.topic_id}},{{reply.id}})" wx:if="{{ reply.can_delete }}"
                                    class="reply-delete" src="/images/trash.png"/>
                         </view>
                     </repeat>
@@ -89,12 +89,6 @@
                 this.page = 1
                 this.getReplies(true)
             })
-        }
-
-        methods = {
-            deleteReply(topic_id, reply_id) {
-
-            }
         }
     }
 </script>
